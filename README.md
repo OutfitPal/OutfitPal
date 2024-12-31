@@ -41,7 +41,7 @@ OutfitPal is your ultimate personal style assistant. Whether you're deciding wha
    ```
 
 2. Open the project in your IDE:
-   - If using **Swift**, open the `OutfitPal.xcodeproj` file.
+   - Open the `OutfitPal.xcodeproj` file.
 
 3. Install dependencies:
    - **For iOS**:
