@@ -132,6 +132,13 @@ OutfitPal is your ultimate personal style assistant. Whether you're deciding wha
 4. **Sustainability Insights**
    - Track the sustainability of your wardrobe and suggest eco-friendly purchases.
 
+Fix this
+
+5. People should be able to share wardrobes/styles
+- There should also be a global community
+- Outfit of the day where users get points
+- 
+
 ---
 
 OutfitPal aims to make fashion accessible and enjoyable for everyone. Let us know if you have ideas or features you'd love to see in the app!
