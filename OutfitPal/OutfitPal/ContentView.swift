@@ -8,14 +8,26 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var authManager: AuthManager
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group{
+            if authManager.userSession != nil{
+                if !authManager.showAccountDeletedAlert{
+                    BrowseTabView()}
+                else{
+                    
+                }
+                
+            }
+            else{
+                SignInView()
+            }
         }
-        .padding()
+        .alert("Account Deleted", isPresented: $authManager.showAccountDeletedAlert) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text("Your account has been deleted. Please sign in again if you wish to continue using the app.")
+                }
     }
 }
 

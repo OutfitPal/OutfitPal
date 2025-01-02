@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SignInView: View {
+    @EnvironmentObject var authManager : AuthManager
 
     @State private var showAlert = false
     @State private var alertMessage = ""
@@ -22,13 +23,21 @@ struct SignInView: View {
                                 .ignoresSafeArea()
     
                         }
+            
 
             // Button
             VStack {
                 Spacer()
 
                 Button {
-                    // TODO: Add sign-in logic here
+                    Task{
+                        do{
+                            try await authManager.signInWithGoogle()
+                        }catch{
+                            showAlert = true
+                            alertMessage = "No account exists with the provided credentials"
+                        }
+                    }
                 } label: {
                     HStack {
                         Text("SIGN IN WITH EMAIL")
@@ -46,9 +55,18 @@ struct SignInView: View {
                 .padding(.bottom, 50) // Adjust bottom padding as needed
                 .alert(isPresented: $showAlert) {
                     Alert(
-                        title: Text("Error"),
+                        title: Text("Authentication Error"),
                         message: Text(alertMessage),
-                        dismissButton: .default(Text("OK"))
+                        primaryButton: .default(Text("Create Account")) {
+                            Task {
+                                               try? await authManager.signUpWithGoogle()
+                                           }
+                        },
+                        secondaryButton: .cancel(Text("Cancel")){
+                            showAlert = false
+                            alertMessage = ""
+                            
+                        }
                     )
                 }
             }

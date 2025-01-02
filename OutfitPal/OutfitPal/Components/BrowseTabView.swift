@@ -11,7 +11,7 @@ struct BrowseTabView: View {
     var body: some View {
         TabView {
             Tab("Home", systemImage: "house.fill") {
-//                ReceivedView()
+
             }
             .badge(2)
 
@@ -24,17 +24,14 @@ struct BrowseTabView: View {
                 
             }
             
-
             
-            Tab("Shop", systemImage: "cart.fill") {
-                // ShopView()
-            }
+            Tab("Shop", systemImage: "bag.circle.fill") {
 
-            
+                        }
 
-
+        
             Tab("Comunity", systemImage: "globe") {
-                //ProfileView()
+
             }
 
         }
