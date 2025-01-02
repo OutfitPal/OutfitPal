@@ -10,24 +10,30 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var authManager: AuthManager
     var body: some View {
-        Group{
-            if authManager.userSession != nil{
-                if !authManager.showAccountDeletedAlert{
-                    BrowseTabView()}
-                else{
-                    
+
+        Group {
+                if let userSession = authManager.userSession {
+                    if authManager.currentUser != nil {
+                        BrowseTabView()
+                            .onAppear {
+                                print("Debug: Loaded BrowseTabView for \(userSession.uid)")
+                            }
+                    } else {
+                        // Handle case where Firestore document does not exist
+                        SignInView()
+                            .alert("Account Not Found", isPresented: .constant(true)) {
+                                Button("OK") {
+                                    authManager.signOut()
+                                }
+                            } message: {
+                                Text("No account exists with the provided credentials. Please sign up.")
+                            }
+                    }
+                } else {
+                    SignInView()
                 }
-                
             }
-            else{
-                SignInView()
-            }
-        }
-        .alert("Account Deleted", isPresented: $authManager.showAccountDeletedAlert) {
-                    Button("OK", role: .cancel) { }
-                } message: {
-                    Text("Your account has been deleted. Please sign in again if you wish to continue using the app.")
-                }
+       
     }
 }
 

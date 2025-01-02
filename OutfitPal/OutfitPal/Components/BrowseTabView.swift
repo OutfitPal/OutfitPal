@@ -31,7 +31,7 @@ struct BrowseTabView: View {
 
         
             Tab("Comunity", systemImage: "globe") {
-
+                ProfileView()
             }
 
         }

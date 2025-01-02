@@ -30,6 +30,31 @@ final class AuthManager: ObservableObject{
         }
     }
 
+    func googleClientInit() async throws -> AuthCredential{
+        guard let topVC = Utilities.topViewController() else {
+            throw URLError(.cannotFindHost)
+        }
+        
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            throw URLError(.badServerResponse)
+        }
+                
+        let config = GIDConfiguration(clientID: clientID)
+                
+        GIDSignIn.sharedInstance.configuration = config
+        let gidSignInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
+
+ 
+        let accessToken = gidSignInResult.user.accessToken.tokenString
+                
+        guard let idToken = gidSignInResult.user.idToken?.tokenString else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let credential = GoogleAuthProvider.credential(withIDToken: idToken,
+                                                         accessToken: accessToken)
+        return credential
+    }
     
     func signIn(withEmail email: String, password: String) async throws {
         do{
@@ -60,12 +85,13 @@ final class AuthManager: ObservableObject{
             if snapshot == nil || !snapshot!.exists {
                 // Sign out user from the app
                 self?.showAccountDeletedAlert = true
-                Task {
-                    try? await Auth.auth().signOut()
-                    DispatchQueue.main.async {
-                        self?.userSession = nil
-                    }
-                }
+                self?.signOut()
+//                Task {
+//                    try? await Auth.auth().signOut()
+//                    DispatchQueue.main.async {
+//                        self?.userSession = nil
+//                    }
+//                }
             }
         }
     }
@@ -95,6 +121,8 @@ final class AuthManager: ObservableObject{
             let snapshot = try await userDocRef.getDocument()
             if !snapshot.exists {
                 try await firebaseUser.delete()
+                self.userSession = nil
+                self.currentUser = nil
                 throw NSError(domain: "AuthError", code: 401, userInfo: [NSLocalizedDescriptionKey: "No account exists with the provided credentials."])
             }
             self.userSession = result.user
@@ -104,6 +132,8 @@ final class AuthManager: ObservableObject{
             setupUserExistenceCheck()
         }catch{
             print("Debug: Unable to signIn \(error.localizedDescription)")
+            self.userSession = nil
+                    self.currentUser = nil
             throw error
         }
     }
@@ -113,27 +143,9 @@ final class AuthManager: ObservableObject{
     
     
     func signInWithGoogle() async throws {
-        guard let topVC = Utilities.topViewController() else {
-            throw URLError(.cannotFindHost)
-        }
-        guard let clientID = FirebaseApp.app()?.options.clientID else {
-            throw URLError(.badServerResponse)
-        }
-                
-        let config = GIDConfiguration(clientID: clientID)
-                
-        GIDSignIn.sharedInstance.configuration = config
-        let gidSignInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
+       
+        let credential = try await googleClientInit()
 
- 
-        let accessToken = gidSignInResult.user.accessToken.tokenString
-                
-        guard let idToken = gidSignInResult.user.idToken?.tokenString else {
-            throw URLError(.badServerResponse)
-        }
-        
-        let credential = GoogleAuthProvider.credential(withIDToken: idToken,
-                                                         accessToken: accessToken)
         return try await signInNoEmailOrPassword(credential: credential)
     }
 
@@ -142,9 +154,54 @@ final class AuthManager: ObservableObject{
     
     
     func signUpWithGoogle() async throws {
+        let credential = try await googleClientInit()
         
+        do {
+
+            let result = try await Auth.auth().signIn(with: credential)
+            let firebaseUser = result.user
+            
+
+            let user = User(
+                id: firebaseUser.uid,
+                fullName: firebaseUser.displayName ?? "",
+                email: firebaseUser.email ?? "",
+                profilePictureURL: firebaseUser.photoURL?.absoluteString,
+                wardrobe: [],
+                savedOutfits: [],
+                shoppingPreferences: ShoppingPreferences(preferredBrands: [],
+                                                         preferredColors: [],
+                                                         budgetRange: "Not Set",
+                                                         size: "Not Set"),
+                weeklySchedule: [:],
+                location: "",
+                followers: [],
+                following: [],
+                joinedDate: Date() // Current date as join date
+            )
+            let encodedUser = try JSONEncoder().encode(user)
+            guard let userDictionary = try JSONSerialization.jsonObject(with: encodedUser) as? [String: Any] else {
+                        print("Failed to convert user to dictionary")
+                        return
+                    }
+            let db = Firestore.firestore()
+            try await db.collection("users").document(user.id).setData(userDictionary)
+
+            self.userSession = firebaseUser
+            await fetchUser()
+
+            setupUserExistenceCheck()
+            
+        } catch {
+ 
+            if let user = Auth.auth().currentUser {
+                try await user.delete()
+                self.signOut()
+            }
+            print("Debug: Failed to sign up with Google: \(error.localizedDescription)")
+            throw error
+        }
     }
-    
     
     
 
@@ -196,15 +253,25 @@ final class AuthManager: ObservableObject{
     
     
     func fetchUser() async {
-        guard let userId = Auth.auth().currentUser?.uid else {return}
-        
-        guard let snapshot = try? await Firestore.firestore().collection("users").document(userId).getDocument() else {return}
-        guard let data = snapshot.data() else { return }
-        guard let user = try? JSONDecoder().decode(User.self, from: JSONSerialization.data(withJSONObject: data)) else{return}
-        self.currentUser = user
-        
-        print("Debug: Current User is \(String(describing: self.currentUser))")
-        
+        guard let userId = Auth.auth().currentUser?.uid else {
+            self.currentUser = nil
+            return
+        }
+
+        do {
+            let snapshot = try await Firestore.firestore().collection("users").document(userId).getDocument()
+            guard let data = snapshot.data() else {
+                self.currentUser = nil
+                return
+            }
+
+            let user = try JSONDecoder().decode(User.self, from: JSONSerialization.data(withJSONObject: data))
+            self.currentUser = user
+        } catch {
+            print("Debug: Failed to fetch user: \(error.localizedDescription)")
+            self.currentUser = nil
+        }
     }
+
     
 }
