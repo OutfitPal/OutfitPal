@@ -14,7 +14,7 @@ struct OutfitOfTheDayView: View {
                 .font(.headline)
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color.gray.opacity(0.2))
-                .frame(height: 200)
+                .frame(height: 400)
                 .overlay(
                     VStack {
                         Text("Casual: Red T-shirt and Black Jeans")

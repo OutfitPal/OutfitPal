@@ -1,38 +1,55 @@
-//
-//  HomeView.swift
-//  OutfitPal
-//
-//  Created by Maxwell Kumbong on 1/2/25.
-//
-
-
 import SwiftUI
 
 struct HomePageView: View {
+    @State private var selectedSection: String = "Home"
+
     var body: some View {
-        NavigationView {
+        VStack(spacing: 12) {
+            // Header
+            HeaderView()
+
+            // Horizontal Menu
+            HorizontalMenuView(selectedSection: $selectedSection)
+
+            // Content Section
             ScrollView {
                 VStack(spacing: 20) {
-                    // Header
-                    HeaderView()
+                    switch selectedSection {
+                    case "Home":
+                        OutfitOfTheDayView()
 
-                    // Horizontal Menu
-                    HorizontalMenuView()
+                    case "Outfit Calendar":
+                        OutfitCalendarView()
 
-                    // Outfit of the Day
-                    OutfitOfTheDayView()
+                    case "Digital Closet":
+                        DigitalClosetView()
 
+                    case "Categories":
+                        CategoriesView()
 
+                    case "Wardrobe Insights":
+                        WardrobeInsightsView()
+
+                    case "Style Challenges":
+                        StyleChallengesView()
+
+                    case "Fun Facts":
+                        FunFactsAndStatsView()
+
+                    case "Clothing Care":
+                        ClothingCareTipsView()
+
+                    default:
+                        Text("Unknown Section")
+                    }
                 }
                 .padding()
             }
-            .navigationBarHidden(true)
+            .ignoresSafeArea(edges: .horizontal)
         }
+        .ignoresSafeArea(edges: .horizontal)
     }
 }
-
-
-
 
 #Preview {
     HomePageView()

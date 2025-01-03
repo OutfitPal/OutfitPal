@@ -8,24 +8,23 @@
 import SwiftUI
 
 struct HorizontalMenuView: View {
-    @State private var selectedMenu: MenuItem? = nil
+    @Binding var selectedSection: String
 
     struct MenuItem: Identifiable {
         let id = UUID()
         let title: String
         let icon: String
-        let view: AnyView
     }
 
-    // Define menu items
     let menuItems: [MenuItem] = [
-        MenuItem(title: "Outfit Calendar", icon: "calendar", view: AnyView(OutfitCalendarView())),
-        MenuItem(title: "Digital Closet", icon: "folder.fill", view: AnyView(DigitalClosetView())),
-        MenuItem(title: "Categories", icon: "list.bullet.rectangle", view: AnyView(CategoriesView())),
-        MenuItem(title: "Wardrobe Insights", icon: "chart.bar.fill", view: AnyView(WardrobeInsightsView())),
-        MenuItem(title: "Style Challenges", icon: "star.circle.fill", view: AnyView(StyleChallengesView())),
-        MenuItem(title: "Fun Facts", icon: "info.circle.fill", view: AnyView(FunFactsAndStatsView())),
-        MenuItem(title: "Clothing Care", icon: "paintbrush", view: AnyView(ClothingCareTipsView()))
+        MenuItem(title: "Home", icon: "house.fill"),
+        MenuItem(title: "Outfit Calendar", icon: "calendar"),
+        MenuItem(title: "Digital Closet", icon: "folder.fill"),
+        MenuItem(title: "Categories", icon: "list.bullet.rectangle"),
+        MenuItem(title: "Wardrobe Insights", icon: "chart.bar.fill"),
+        MenuItem(title: "Style Challenges", icon: "star.circle.fill"),
+        MenuItem(title: "Fun Facts", icon: "info.circle.fill"),
+        MenuItem(title: "Clothing Care", icon: "paintbrush")
     ]
 
     var body: some View {
@@ -33,29 +32,27 @@ struct HorizontalMenuView: View {
             HStack(spacing: 20) {
                 ForEach(menuItems) { item in
                     Button(action: {
-                        selectedMenu = item // Assign the selected menu item
+                        selectedSection = item.title // Update the selected section
                     }) {
                         VStack {
                             Image(systemName: item.icon)
                                 .resizable()
                                 .frame(width: 40, height: 40)
-                                .foregroundColor(.blue)
+                                .foregroundColor(selectedSection == item.title ? .blue : .gray)
+
                             Text(item.title)
                                 .font(.footnote)
                                 .multilineTextAlignment(.center)
+                                .foregroundColor(selectedSection == item.title ? .blue : .gray)
                         }
                     }
                 }
             }
             .padding(.horizontal)
         }
-        // Display the sheet with the selected menu's view
-        .sheet(item: $selectedMenu) { menu in
-            menu.view
-        }
     }
 }
 
-#Preview {
-    HorizontalMenuView()
-}
+//#Preview {
+//    HorizontalMenuView()
+//}
