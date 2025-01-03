@@ -38,6 +38,9 @@ struct HomePageView: View {
 
                     case "Clothing Care":
                         ClothingCareTipsView()
+                        
+                    case "Profile":
+                        ProfileView()
 
                     default:
                         Text("Unknown Section")

@@ -12,20 +12,20 @@ struct ContentView: View {
                         .onAppear {
                             print("Debug: Loaded BrowseTabView for \(userSession.uid)")
                         }
-                } else if authManager.userSession != nil {
- 
-                    SignInView()
-                        .alert("Account Not Found", isPresented: $showNoAccountAlert) {
-                            Button("OK") {
-                                authManager.signOut()
-                                showNoAccountAlert = false
-                            }
-                        } message: {
-                            Text("No account exists with the provided credentials. Please sign up.")
-                        }
-                        .onAppear {
-                            showNoAccountAlert = true
-                        }
+//                } else if authManager.userSession != nil {
+// 
+//                    SignInView()
+//                        .alert("Account Not Found", isPresented: $showNoAccountAlert) {
+//                            Button("OK") {
+//                                authManager.signOut()
+//                                showNoAccountAlert = false
+//                            }
+//                        } message: {
+//                            Text("No account exists with the provided credentials. Please sign up.")
+//                        }
+//                        .onAppear {
+//                            showNoAccountAlert = true
+//                        }
                 }
             } else {
                 SignInView()

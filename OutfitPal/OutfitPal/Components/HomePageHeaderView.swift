@@ -9,6 +9,8 @@ import SwiftUI
 
 struct HeaderView: View {
     @EnvironmentObject var authManager: AuthManager
+    @State private var showProfileView = false // State to control the sheet
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -20,18 +22,22 @@ struct HeaderView: View {
                     .foregroundColor(.gray)
             }
             Spacer()
-            Button{
-                ProfileView()
+            Button {
+                showProfileView = true // Show the settings view
             } label: {
                 Image(systemName: "gearshape.fill")
                     .resizable()
                     .frame(width: 30, height: 30)
                     .foregroundColor(.gray)
             }
+            .sheet(isPresented: $showProfileView) {
+                ProfileView() // Display ProfileView as a sheet
+            }
         }
         .padding(.horizontal)
     }
 }
+
 
 
 #Preview {

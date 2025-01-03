@@ -54,5 +54,5 @@ struct HorizontalMenuView: View {
 }
 
 //#Preview {
-//    HorizontalMenuView()
+//    HorizontalMenuView(selectedSection: $selectedSection)
 //}
