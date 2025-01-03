@@ -5,14 +5,35 @@
 //  Created by Maxwell Kumbong on 1/2/25.
 //
 
+
 import SwiftUI
 
-struct HomeView: View {
+struct HomePageView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Header
+                    HeaderView()
+
+                    // Horizontal Menu
+                    HorizontalMenuView()
+
+                    // Outfit of the Day
+                    OutfitOfTheDayView()
+
+
+                }
+                .padding()
+            }
+            .navigationBarHidden(true)
+        }
     }
 }
 
+
+
+
 #Preview {
-    HomeView()
+    HomePageView()
 }

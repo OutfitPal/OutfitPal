@@ -11,7 +11,7 @@ struct BrowseTabView: View {
     var body: some View {
         TabView {
             Tab("Home", systemImage: "house.fill") {
-
+                HomePageView()
             }
             .badge(2)
 
@@ -31,7 +31,7 @@ struct BrowseTabView: View {
 
         
             Tab("Comunity", systemImage: "globe") {
-                ProfileView()
+
             }
 
         }
