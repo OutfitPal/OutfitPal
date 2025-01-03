@@ -37,7 +37,7 @@ struct HorizontalMenuView: View {
                         VStack {
                             Image(systemName: item.icon)
                                 .resizable()
-                                .frame(width: 40, height: 40)
+                                .frame(width: 30, height: 30)
                                 .foregroundColor(selectedSection == item.title ? .blue : .gray)
 
                             Text(item.title)

@@ -4,7 +4,7 @@ struct HomePageView: View {
     @State private var selectedSection: String = "Home"
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 20) {
             // Header
             HeaderView()
 
@@ -48,6 +48,7 @@ struct HomePageView: View {
             .ignoresSafeArea(edges: .horizontal)
         }
         .ignoresSafeArea(edges: .horizontal)
+        .padding(.top, 10)
     }
 }
 
