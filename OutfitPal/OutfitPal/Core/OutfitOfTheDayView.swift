@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct OutfitOfTheDayView: View {
+    let date: Date 
     var body: some View {
         VStack(alignment: .leading) {
             Text("Outfit of the Day")
