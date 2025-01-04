@@ -16,4 +16,5 @@ struct ClothingItem: Identifiable, Codable {
     let season: String
     let occasion: String?
     let imageURL: String?
+    let addedDate: Date
 }

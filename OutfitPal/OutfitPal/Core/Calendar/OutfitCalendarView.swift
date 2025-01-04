@@ -81,3 +81,8 @@ struct OutfitCalendarView: View {
 #Preview {
     OutfitCalendarView()
 }
+
+
+
+
+// Addition: If user clicks on future date, ask them to plan outift for that day
