@@ -8,11 +8,23 @@
 import SwiftUI
 
 struct OutfitOfTheDayView: View {
-    let date: Date 
+    let date: Date?
+
+    private var formattedDate: String {
+            if let date = date {
+                let formatter = DateFormatter()
+                formatter.dateStyle = .medium
+                return "Outfit for \(formatter.string(from: date))"
+            } else {
+                return "Outfit of the Day"
+            }
+        }
+
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Outfit of the Day")
+            Text("Outfit for \(formattedDate)")
                 .font(.headline)
+
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color.gray.opacity(0.2))
                 .frame(height: 400)
@@ -31,5 +43,5 @@ struct OutfitOfTheDayView: View {
 }
 
 #Preview {
-    OutfitOfTheDayView()
+    OutfitOfTheDayView(date: nil)
 }
