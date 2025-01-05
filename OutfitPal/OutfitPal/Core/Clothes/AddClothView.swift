@@ -6,8 +6,7 @@
 //
 import SwiftUI
 import PhotosUI
-import FirebaseFirestore
-import FirebaseStorage
+
 
 struct AddClothingView: View {
     @Environment(\.dismiss) var dismiss
@@ -21,8 +20,9 @@ struct AddClothingView: View {
     @State private var name = ""
     @State private var category = ""
     @State private var color = ""
-    @State private var selectedSeasons: Set<String> = []  // Allow multiple selections
+    @State private var selectedSeasons: Set<String> = []  // Multi-selection
     @State private var occasion = ""
+    @State private var showSeasonPicker = false  // Controls season picker visibility
 
     private let categories = [
         "Shirt", "T-shirt", "Sweater", "Hoodie", "Pants", "Jeans", "Shorts",
@@ -83,19 +83,17 @@ struct AddClothingView: View {
 
                         TextField("Color", text: $color)
 
-                        // Multi-selection for seasons
-                        Section(header: Text("Seasons")) {
-                            List {
-                                ForEach(seasons, id: \.self) { season in
-                                    MultipleSelectionRow(title: season, isSelected: selectedSeasons.contains(season)) {
-                                        if selectedSeasons.contains(season) {
-                                            selectedSeasons.remove(season)
-                                        } else {
-                                            selectedSeasons.insert(season)
-                                        }
-                                    }
-                                }
+                        // Multi-Selection Season Picker
+                        Button(action: { showSeasonPicker.toggle() }) {
+                            HStack {
+                                Text("Season")
+                                Spacer()
+                                Text(selectedSeasons.isEmpty ? "Select Seasons" : selectedSeasons.joined(separator: ", "))
+                                    .foregroundColor(selectedSeasons.isEmpty ? .gray : .primary)
                             }
+                        }
+                        .sheet(isPresented: $showSeasonPicker) {
+                            MultiSeasonPicker(selectedSeasons: $selectedSeasons, seasons: seasons)
                         }
 
                         TextField("Occasion (Optional)", text: $occasion)
@@ -179,7 +177,37 @@ struct AddClothingView: View {
     }
 }
 
-// Helper view for multi-selection
+// Custom Multi-Selection Sheet for Seasons
+struct MultiSeasonPicker: View {
+    @Binding var selectedSeasons: Set<String>
+    let seasons: [String]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(seasons, id: \.self) { season in
+                    MultipleSelectionRow(title: season, isSelected: selectedSeasons.contains(season)) {
+                        if selectedSeasons.contains(season) {
+                            selectedSeasons.remove(season)
+                        } else {
+                            selectedSeasons.insert(season)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Select Seasons")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Done") {
+                        UIApplication.shared.windows.first?.rootViewController?.dismiss(animated: true, completion: nil)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Helper View for Multi-Selection
 struct MultipleSelectionRow: View {
     let title: String
     var isSelected: Bool
