@@ -8,11 +8,43 @@
 import SwiftUI
 
 struct ClothingItemView: View {
+    let item: ClothingItem
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            if let imageURL = item.imageURL, let url = URL(string: imageURL), !imageURL.isEmpty {
+
+                AsyncImage(url: url) { image in
+                    image.resizable()
+                } placeholder: {
+                    ProgressView()
+                }
+                .frame(width: 150, height: 150)
+                .cornerRadius(10)
+            } else {
+ 
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 150, height: 150)
+                    .cornerRadius(10)
+                    .overlay(
+                        Text("No Image")
+                            .foregroundColor(.gray)
+                            .font(.caption)
+                    )
+            }
+
+            Text(item.name)
+                .font(.caption)
+                .padding(.top, 5)
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(radius: 3)
     }
 }
 
-#Preview {
-    ClothingItemView()
-}
+//#Preview {
+//    ClothingItemView()
+//}

@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct DigitalClosetView: View {
-    @State private var selectedCategory: String = "All" // Default to 'All'
-    @State private var clothes: [ClothingItem] = [] // Stores clothing items
-    @State private var isLoading = true // Loading state
+    @State private var selectedCategory: String = "All"
+    
+    @State private var clothes: [ClothingItem] = []
+    @State private var isLoading = true
+    @State private var errorMessage: String?
 
     private let categories = [
         "All", "Shirt", "T-shirt", "Sweater", "Hoodie", "Pants", "Jeans", "Shorts",
@@ -25,13 +28,12 @@ struct DigitalClosetView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                // Horizontal Category Selector
+             
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
                         ForEach(categories, id: \.self) { category in
                             Button(action: {
                                 selectedCategory = category
-                                //fetchClothes() // Refresh items when category is selected
                             }) {
                                 Text(category)
                                     .padding(.horizontal, 12)
@@ -50,6 +52,10 @@ struct DigitalClosetView: View {
                 if isLoading {
                     ProgressView("Loading clothes...")
                         .padding()
+                } else if let errorMessage = errorMessage {
+                    Text("❌ \(errorMessage)")
+                        .foregroundColor(.red)
+                        .padding()
                 } else if filteredClothes.isEmpty {
                     Text("No items found for \(selectedCategory)")
                         .foregroundColor(.gray)
@@ -67,13 +73,31 @@ struct DigitalClosetView: View {
             }
             .navigationTitle("Digital Closet")
             .onAppear {
-              //  fetchClothes() // Load clothes when the view appears
+                fetchClothes() // Fetch clothes when the view appears
             }
         }
     }
 
-    
+    // Fetch clothing items from Firestore
+    private func fetchClothes() {
+        isLoading = true
+        errorMessage = nil
+
+        ClothManager.shared.getClothes { result in
+            DispatchQueue.main.async {  
+                self.isLoading = false
+                switch result {
+                case .success(let fetchedClothes):
+                    self.clothes = fetchedClothes
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                    print("❌ Error fetching clothes: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
 }
+
 
 // Clothing Item View
 

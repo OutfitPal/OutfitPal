@@ -176,7 +176,6 @@ final class ClothManager: ObservableObject {
     }
 
 
-    // MARK: - Retrieve All Clothing Items
     func getClothes(completion: @escaping (Result<[ClothingItem], Error>) -> Void) {
         guard let userId = userId else {
             completion(.failure(NSError(domain: "AuthError", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
@@ -184,45 +183,42 @@ final class ClothManager: ObservableObject {
         }
 
         let userRef = db.collection("users").document(userId)
+        print("🔹 Fetching user document for ID: \(userId)")
 
         userRef.getDocument { document, error in
             if let error = error {
+                print("❌ Firestore fetch error: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
 
-            guard let document = document, document.exists, let user = try? document.data(as: User.self) else {
+            guard let document = document, document.exists else {
+                print("❌ Firestore: User document does not exist")
                 completion(.failure(NSError(domain: "FirestoreError", code: 404, userInfo: [NSLocalizedDescriptionKey: "User data not found"])))
                 return
             }
 
-            completion(.success(user.wardrobe))
+            let documentData = document.data() ?? [:]
+            print("✅ Firestore document data: \(documentData)")
+
+            // Retrieve the wardrobe array
+            if let wardrobeArray = documentData["wardrobe"] as? [[String: Any]] {
+                do {
+                    // Convert wardrobe dictionaries back into ClothingItem objects
+                    let jsonData = try JSONSerialization.data(withJSONObject: wardrobeArray, options: [])
+                    let decodedWardrobe = try JSONDecoder().decode([ClothingItem].self, from: jsonData)
+                    
+                    completion(.success(decodedWardrobe))
+                } catch {
+                    print("❌ Decoding error: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
+            } else {
+                print("🔍 Wardrobe data is missing or empty")
+                completion(.success([])) // Return empty array if wardrobe is missing
+            }
         }
     }
-//    /// Fetches all stored outfits from Firestore.
-//    func getAllClothes() {
-//        db.collection("outfits").getDocuments { snapshot, error in
-//            if let error = error {
-//                print("Error fetching outfits: \(error.localizedDescription)")
-//                return
-//            }
-//
-//            DispatchQueue.main.async {
-//                self.outfits.removeAll()
-//            }
-//
-//            snapshot?.documents.forEach { document in
-//                if let data = document.data(),
-//                   let dateString = data["date"] as? String,
-//                   let outfit = data["outfit"] as? String,
-//                   let date = self.dateFromFormattedString(dateString) {
-//                    DispatchQueue.main.async {
-//                        self.outfits[date] = outfit
-//                    }
-//                }
-//            }
-//        }
-//    }
 
 
     func removeCloth(for date: Date) {
