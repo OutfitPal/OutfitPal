@@ -67,7 +67,7 @@ final class ClothManager: ObservableObject {
     private func uploadImageToCloudinary(image: UIImage, completion: @escaping (String?) -> Void) {
         let cloudName = "dtywy6khv"
         let uploadPreset = "outfit_pal"
-        let folder = "home/clothes"
+        let folder = "OutfitPal/clothes"
 
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             print("Debug: Failed to convert image to data")
@@ -146,29 +146,35 @@ final class ClothManager: ObservableObject {
         }
 
         let userRef = db.collection("users").document(userId)
-        print("USErr id: \(userId)")
-        userRef.getDocument { document, error in
-            if let error = error {
-                completion(.failure(error))
+        print("Debug: Fetching user document for userId: \(userId)")
+
+        // Convert ClothingItem to a dictionary using JSONEncoder
+        do {
+            let jsonData = try JSONEncoder().encode(clothingItem)
+            guard let clothingDict = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] else {
+                print("Debug: Failed to convert ClothingItem to dictionary")
+                completion(.failure(NSError(domain: "EncodingError", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to encode clothing item"])))
                 return
             }
 
-            guard let document = document, document.exists, var user = try? document.data(as: User.self) else {
-                completion(.failure(NSError(domain: "FirestoreError", code: 404, userInfo: [NSLocalizedDescriptionKey: "User data not found"])))
-                return
+            // Append clothing item to Firestore wardrobe array
+            userRef.updateData([
+                "wardrobe": FieldValue.arrayUnion([clothingDict])
+            ]) { error in
+                if let error = error {
+                    print("Debug: Failed to update wardrobe: \(error.localizedDescription)")
+                    completion(.failure(error))
+                } else {
+                    print("✅ Debug: Successfully added new clothing item to wardrobe")
+                    completion(.success(()))
+                }
             }
-
-            // Add new clothing item to user's wardrobe
-            user.wardrobe.append(clothingItem)
-
-            do {
-                try userRef.setData(from: user, merge: true)
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
+        } catch {
+            print("Debug: JSON encoding failed: \(error.localizedDescription)")
+            completion(.failure(error))
         }
     }
+
 
     // MARK: - Retrieve All Clothing Items
     func getClothes(completion: @escaping (Result<[ClothingItem], Error>) -> Void) {

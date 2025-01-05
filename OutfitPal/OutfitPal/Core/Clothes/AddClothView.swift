@@ -143,6 +143,7 @@ struct AddClothingView: View {
                     switch result {
                     case .success:
                         print("✅ Clothing item added successfully!")
+                        
                     case .failure(let error):
                         print("❌ Error adding clothing item: \(error.localizedDescription)")
                     }
