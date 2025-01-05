@@ -13,7 +13,7 @@ struct ClothingItem: Identifiable, Codable {
     let name: String
     let category: String
     let color: String
-    let season: String
+    let seasons: [String]
     let occasion: String?
     let imageURL: String?
     let addedDate: Date

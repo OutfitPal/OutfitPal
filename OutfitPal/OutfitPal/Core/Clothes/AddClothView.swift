@@ -1,5 +1,5 @@
 //
-//  AddClothView.swift
+//  AddClothingView.swift
 //  OutfitPal
 //
 //  Created by Maxwell Kumbong on 1/3/25.
@@ -17,14 +17,19 @@ struct AddClothingView: View {
     @State private var alertMessage: String = ""
     @State private var selectedImage: UIImage?
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
-    
+
     @State private var name = ""
     @State private var category = ""
     @State private var color = ""
-    @State private var season = ""
+    @State private var selectedSeasons: Set<String> = []  // Allow multiple selections
     @State private var occasion = ""
 
-    private let categories = ["Shirt", "Pants", "Jacket", "Shoes", "Dress", "Accessories", "Skirt"]
+    private let categories = [
+        "Shirt", "T-shirt", "Sweater", "Hoodie", "Pants", "Jeans", "Shorts",
+        "Jacket", "Coat", "Shoes", "Sneakers", "Boots", "Dress", "Suit", "Blazer",
+        "Accessories", "Hat", "Scarf", "Gloves", "Skirt"
+    ]
+
     private let seasons = ["Spring", "Summer", "Fall", "Winter"]
 
     var body: some View {
@@ -78,9 +83,18 @@ struct AddClothingView: View {
 
                         TextField("Color", text: $color)
 
-                        Picker("Season", selection: $season) {
-                            ForEach(seasons, id: \.self) { season in
-                                Text(season)
+                        // Multi-selection for seasons
+                        Section(header: Text("Seasons")) {
+                            List {
+                                ForEach(seasons, id: \.self) { season in
+                                    MultipleSelectionRow(title: season, isSelected: selectedSeasons.contains(season)) {
+                                        if selectedSeasons.contains(season) {
+                                            selectedSeasons.remove(season)
+                                        } else {
+                                            selectedSeasons.insert(season)
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -88,10 +102,7 @@ struct AddClothingView: View {
                     }
 
                     // Save Button
-                    Button{
-                        addClothingItem()
-                    }
-                    label:{
+                    Button(action: addClothingItem) {
                         Text("Save Clothing Item")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -108,55 +119,85 @@ struct AddClothingView: View {
                 ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
             }
             .alert(isPresented: $showAlert) {
-                            Alert(title: Text("Missing Information"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-                        }
+                Alert(title: Text("Missing Information"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            }
         }
     }
-    
+
     private func addClothingItem() {
         if name.isEmpty {
-                    showWarning(message: "Please enter a name for the clothing item.")
-                    return
-                }
-                if category.isEmpty {
-                    showWarning(message: "Please select a category.")
-                    return
-                }
-                if color.isEmpty {
-                    showWarning(message: "Please enter a color.")
-                    return
-                }
-                if season.isEmpty {
-                    showWarning(message: "Please select a season.")
-                    return
-                }
-            ClothManager.shared.addCloth(
-                name: name,
-                category: category,
-                color: color,
-                season: season,
-                occasion: occasion.isEmpty ? nil : occasion,
-                selectedImage: selectedImage
-            ) { result in
-                DispatchQueue.main.async {
-  
-                    switch result {
-                    case .success:
-                        print("✅ Clothing item added successfully!")
-                        
-                    case .failure(let error):
-                        print("❌ Error adding clothing item: \(error.localizedDescription)")
-                    }
+            showWarning(message: "Please enter a name for the clothing item.")
+            return
+        }
+        if category.isEmpty {
+            showWarning(message: "Please select a category.")
+            return
+        }
+        if color.isEmpty {
+            showWarning(message: "Please enter a color.")
+            return
+        }
+        if selectedSeasons.isEmpty {
+            showWarning(message: "Please select at least one season.")
+            return
+        }
+
+        ClothManager.shared.addCloth(
+            name: name,
+            category: category,
+            color: color,
+            seasons: Array(selectedSeasons),  // Convert set to array
+            occasion: occasion.isEmpty ? nil : occasion,
+            selectedImage: selectedImage
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("✅ Clothing item added successfully!")
+                    clearFields() // Clear input fields after success
+                    
+                case .failure(let error):
+                    print("❌ Error adding clothing item: \(error.localizedDescription)")
                 }
             }
         }
+    }
 
     private func showWarning(message: String) {
-            alertMessage = message
-            showAlert = true
-        }
+        alertMessage = message
+        showAlert = true
+    }
+
+    // Function to reset input fields
+    private func clearFields() {
+        name = ""
+        category = ""
+        color = ""
+        selectedSeasons.removeAll()
+        occasion = ""
+        selectedImage = nil
+    }
 }
 
+// Helper view for multi-selection
+struct MultipleSelectionRow: View {
+    let title: String
+    var isSelected: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.blue)
+                }
+            }
+        }
+    }
+}
 
 #Preview {
     AddClothingView()

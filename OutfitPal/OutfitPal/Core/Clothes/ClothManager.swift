@@ -31,7 +31,7 @@ final class ClothManager: ObservableObject {
     }
 
  
-    func addCloth(name: String, category: String, color: String, season: String, occasion: String?, selectedImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
+    func addCloth(name: String, category: String, color: String, seasons: [String], occasion: String?, selectedImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
 
         if let selectedImage = selectedImage {
             uploadImageToCloudinary(image: selectedImage) { imageURL in
@@ -40,7 +40,7 @@ final class ClothManager: ObservableObject {
                     name: name,
                     category: category,
                     color: color,
-                    season: season,
+                    seasons: seasons,
                     occasion: occasion?.isEmpty == true ? nil : occasion,
                     imageURL: imageURL,
                     addedDate: Date()
@@ -54,7 +54,7 @@ final class ClothManager: ObservableObject {
                 name: name,
                 category: category,
                 color: color,
-                season: season,
+                seasons: seasons,
                 occasion: occasion?.isEmpty == true ? nil : occasion,
                 imageURL: nil,
                 addedDate: Date()
