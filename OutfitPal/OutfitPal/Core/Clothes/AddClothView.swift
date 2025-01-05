@@ -13,6 +13,8 @@ struct AddClothingView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showImagePicker = false
     @State private var showActionSheet = false
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
     @State private var selectedImage: UIImage?
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     
@@ -86,7 +88,10 @@ struct AddClothingView: View {
                     }
 
                     // Save Button
-                    Button(action: saveClothingItem) {
+                    Button{
+                        addClothingItem()
+                    }
+                    label:{
                         Text("Save Clothing Item")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -102,64 +107,53 @@ struct AddClothingView: View {
             .sheet(isPresented: $showImagePicker) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
             }
+            .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Missing Information"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+                        }
         }
     }
-
-    // MARK: - Save to Firebase
-    private func saveClothingItem() {
-        guard let selectedImage = selectedImage else { return }
-
-        uploadImageToFirebase(image: selectedImage) { imageURL in
-            let newClothing = ClothingItem(
-                id: UUID().uuidString,
+    
+    private func addClothingItem() {
+        if name.isEmpty {
+                    showWarning(message: "Please enter a name for the clothing item.")
+                    return
+                }
+                if category.isEmpty {
+                    showWarning(message: "Please select a category.")
+                    return
+                }
+                if color.isEmpty {
+                    showWarning(message: "Please enter a color.")
+                    return
+                }
+                if season.isEmpty {
+                    showWarning(message: "Please select a season.")
+                    return
+                }
+            ClothManager.shared.addCloth(
                 name: name,
                 category: category,
                 color: color,
                 season: season,
                 occasion: occasion.isEmpty ? nil : occasion,
-                imageURL: imageURL,
-                addedDate: Date()
-            )
-
-            saveClothingToFirestore(clothingItem: newClothing)
-        }
-    }
-
-    private func uploadImageToFirebase(image: UIImage, completion: @escaping (String?) -> Void) {
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            completion(nil)
-            return
-        }
-
-        let storageRef = Storage.storage().reference().child("clothes/\(UUID().uuidString).jpg")
-        storageRef.putData(imageData, metadata: nil) { _, error in
-            if let error = error {
-                print("Failed to upload image: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-
-            storageRef.downloadURL { url, error in
-                if let url = url {
-                    completion(url.absoluteString)
-                } else {
-                    completion(nil)
+                selectedImage: selectedImage
+            ) { result in
+                DispatchQueue.main.async {
+  
+                    switch result {
+                    case .success:
+                        print("✅ Clothing item added successfully!")
+                    case .failure(let error):
+                        print("❌ Error adding clothing item: \(error.localizedDescription)")
+                    }
                 }
             }
         }
-    }
 
-    private func saveClothingToFirestore(clothingItem: ClothingItem) {
-        let db = Firestore.firestore()
-
-        do {
-            try db.collection("wardrobe").document(clothingItem.id).setData(from: clothingItem)
-            print("Clothing item saved successfully")
-            dismiss() // Close the view after saving
-        } catch {
-            print("Error saving clothing item: \(error.localizedDescription)")
+    private func showWarning(message: String) {
+            alertMessage = message
+            showAlert = true
         }
-    }
 }
 
 

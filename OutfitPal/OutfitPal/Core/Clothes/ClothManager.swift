@@ -10,31 +10,31 @@ import Foundation
 import FirebaseFirestore
 import FirebaseStorage
 import SwiftUICore
+import FirebaseAuth
 
 
-
+@MainActor
 final class ClothManager: ObservableObject {
     
-    @EnvironmentObject var authManager: AuthManager
+    private var authManager: AuthManager!  // Force unwrapped because it will be set
     private let db = Firestore.firestore()
-    private var userId: String?{ authManager.currentUser?.id}
+    private var userId: String? { authManager.currentUser?.id }
     private let storage = Storage.storage()
-
-
+    
     static let shared = ClothManager()
     
     private init() {}
-
+    
+    // Method to set up the auth manager
+    func configure(with authManager: AuthManager) {
+        self.authManager = authManager
+    }
 
  
     func addCloth(name: String, category: String, color: String, season: String, occasion: String?, selectedImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let userId = userId else {
-            completion(.failure(NSError(domain: "AuthError", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
-            return
-        }
 
         if let selectedImage = selectedImage {
-            uploadImageToFirebase(image: selectedImage) { imageURL in
+            uploadImageToCloudinary(image: selectedImage) { imageURL in
                 let newClothingItem = ClothingItem(
                     id: UUID().uuidString,
                     name: name,
@@ -46,7 +46,7 @@ final class ClothManager: ObservableObject {
                     addedDate: Date()
                 )
 
-                self.saveClothingToFirestore(userId: userId, clothingItem: newClothingItem, completion: completion)
+                self.saveClothingToFirestore(clothingItem: newClothingItem, completion: completion)
             }
         } else {
             let newClothingItem = ClothingItem(
@@ -60,41 +60,93 @@ final class ClothManager: ObservableObject {
                 addedDate: Date()
             )
 
-            saveClothingToFirestore(userId: userId, clothingItem: newClothingItem, completion: completion)
+            saveClothingToFirestore(clothingItem: newClothingItem, completion: completion)
         }
     }
 
+    private func uploadImageToCloudinary(image: UIImage, completion: @escaping (String?) -> Void) {
+        let cloudName = "dtywy6khv"
+        let uploadPreset = "outfit_pal"
+        let folder = "home/clothes"
 
-    private func uploadImageToFirebase(image: UIImage, completion: @escaping (String?) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            print("Debug: Failed to convert image to data")
             completion(nil)
             return
         }
 
-        let imageID = UUID().uuidString
-        let storageRef = storage.reference().child("clothes/\(imageID).jpg")
+        let url = URL(string: "https://api.cloudinary.com/v1_1/\(cloudName)/image/upload")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
 
-        storageRef.putData(imageData, metadata: nil) { _, error in
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+        let boundaryPrefix = "--\(boundary)\r\n"
+
+        // File data
+        body.append(boundaryPrefix.data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n".data(using: .utf8)!)
+
+        // Upload preset
+        body.append(boundaryPrefix.data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"upload_preset\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(uploadPreset)\r\n".data(using: .utf8)!)
+
+        // Folder path
+        body.append(boundaryPrefix.data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"folder\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(folder)\r\n".data(using: .utf8)!)
+
+        // Close boundary
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Failed to upload image: \(error.localizedDescription)")
+                print("Debug: Failed to upload image: \(error.localizedDescription)")
                 completion(nil)
                 return
             }
 
-            storageRef.downloadURL { url, error in
-                if let url = url {
-                    completion(url.absoluteString)
-                } else {
-                    completion(nil)
+            guard let data = data else {
+                print("Debug: No data received from Cloudinary")
+                completion(nil)
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    if let url = json["secure_url"] as? String {
+                        print("Debug: Successfully uploaded image to: \(url)")
+                        completion(url)
+                    } else {
+                        print("Debug: Cloudinary response did not include a URL")
+                        completion(nil)
+                    }
                 }
+            } catch {
+                print("Debug: Failed to parse Cloudinary response: \(error.localizedDescription)")
+                completion(nil)
             }
         }
+
+        task.resume()
     }
 
-    
-    private func saveClothingToFirestore(userId: String, clothingItem: ClothingItem, completion: @escaping (Result<Void, Error>) -> Void) {
-        let userRef = db.collection("users").document(userId)
+    private func saveClothingToFirestore(clothingItem: ClothingItem, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let userId = userId else {
+            completion(.failure(NSError(domain: "AuthError", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
+            return
+        }
 
+        let userRef = db.collection("users").document(userId)
+        print("USErr id: \(userId)")
         userRef.getDocument { document, error in
             if let error = error {
                 completion(.failure(error))

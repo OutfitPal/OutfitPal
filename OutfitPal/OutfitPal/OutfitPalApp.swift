@@ -13,8 +13,11 @@ struct OutfitPalApp: App {
     @StateObject var authManager = AuthManager()
 
     init() {
-           FirebaseApp.configure()
-       }
+        FirebaseApp.configure()
+        // Configure the singleton with authManager
+        ClothManager.shared.configure(with: authManager)
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
