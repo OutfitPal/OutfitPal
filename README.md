@@ -4,6 +4,7 @@ OutfitPal is your ultimate personal style assistant. Whether you're deciding wha
 
 ---
 
+
 ## **Features**
 
 ### 1. **Personalized Outfit Suggestions**
