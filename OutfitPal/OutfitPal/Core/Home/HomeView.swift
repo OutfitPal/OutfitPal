@@ -53,7 +53,7 @@ struct HomePageView: View {
                 .ignoresSafeArea(edges: .horizontal)
             }
             .ignoresSafeArea(edges: .horizontal)
-            .padding(.top, 10)
+            .padding(.top, 20)
         }}
 }
 

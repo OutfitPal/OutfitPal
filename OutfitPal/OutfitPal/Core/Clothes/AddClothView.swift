@@ -17,7 +17,6 @@ struct AddClothingView: View {
     @State private var selectedImage: UIImage?
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
 
-    @State private var name = ""
     @State private var category = ""
     @State private var color = ""
     @State private var selectedSeasons: Set<String> = []  // Multi-selection
@@ -73,7 +72,7 @@ struct AddClothingView: View {
                 // Clothing Details Form
                 Form {
                     Section(header: Text("Clothing Details")) {
-                        TextField("Name", text: $name)
+                      
 
                         Picker("Category", selection: $category) {
                             ForEach(categories, id: \.self) { category in
@@ -123,10 +122,7 @@ struct AddClothingView: View {
     }
 
     private func addClothingItem() {
-        if name.isEmpty {
-            showWarning(message: "Please enter a name for the clothing item.")
-            return
-        }
+
         if category.isEmpty {
             showWarning(message: "Please select a category.")
             return
@@ -141,7 +137,6 @@ struct AddClothingView: View {
         }
 
         ClothManager.shared.addCloth(
-            name: name,
             category: category,
             color: color,
             seasons: Array(selectedSeasons),  // Convert set to array
@@ -168,7 +163,6 @@ struct AddClothingView: View {
 
     // Function to reset input fields
     private func clearFields() {
-        name = ""
         category = ""
         color = ""
         selectedSeasons.removeAll()

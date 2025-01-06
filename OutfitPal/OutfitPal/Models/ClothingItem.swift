@@ -10,7 +10,6 @@ import Foundation
 
 struct ClothingItem: Identifiable, Codable {
     let id: String
-    let name: String
     let category: String
     let color: String
     let seasons: [String]

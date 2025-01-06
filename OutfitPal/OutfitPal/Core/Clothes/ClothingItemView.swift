@@ -19,7 +19,7 @@ struct ClothingItemView: View {
                 } placeholder: {
                     ProgressView()
                 }
-                .frame(width: 150, height: 150)
+                .frame(width: 110, height: 110)
                 .cornerRadius(10)
             } else {
  
@@ -33,10 +33,6 @@ struct ClothingItemView: View {
                             .font(.caption)
                     )
             }
-
-            Text(item.name)
-                .font(.caption)
-                .padding(.top, 5)
         }
         .padding()
         .background(Color.white)

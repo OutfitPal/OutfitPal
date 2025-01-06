@@ -62,7 +62,7 @@ struct DigitalClosetView: View {
                         .padding()
                 } else {
                     ScrollView {
-                        LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 2), spacing: 16) {
+                        LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 2), spacing: 20) {
                             ForEach(filteredClothes) { clothingItem in
                                 ClothingItemView(item: clothingItem)
                             }
