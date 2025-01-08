@@ -11,6 +11,7 @@ git checkout -b <name_of_branch>
 ```
 Replace `name_of_branch` with a descriptive branch name, such as `fix-bug` or `add-feature`.
 
+
 #### **Step 3: Make Changes and Commit**
 Check the status of modified files:
 ```bash
