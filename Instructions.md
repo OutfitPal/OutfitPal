@@ -23,6 +23,7 @@ Stage all changes:
 git add .
 ```
 
+
 Commit the changes with a meaningful message:
 ```bash
 git commit -m "Description of changes"
