@@ -109,6 +109,8 @@ OutfitPal is your ultimate personal style assistant. Whether you're deciding wha
 ### **Wardrobe**
    - Add and manage your clothing items.
    - Categorize by type, season, and occasion.
+   - <img width="393" alt="Screenshot 2025-01-10 at 12 50 15 PM" src="https://github.com/user-attachments/assets/27b6611d-c4d0-4835-b41f-09ba6c81e977" />
+
 
 ### **Outfit Suggestions**
    - Generate outfit ideas based on your wardrobe and preferences.
