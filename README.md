@@ -77,6 +77,7 @@ OutfitPal is your ultimate personal style assistant. Whether you're deciding wha
 
 3. **Get Outfit Suggestions**
    - Provide details like the occasion, weather, or mood, and let the app do the rest.
+   - <img width="403" alt="Screenshot 2025-01-10 at 12 49 51 PM" src="https://github.com/user-attachments/assets/b8ac0e77-b5bc-468a-821e-29144f99d9b4" />
 
 4. **Discover New Styles**
    - Browse personalized shopping recommendations and community ideas.
