@@ -1,7 +1,3 @@
-Here is your modified **OutfitPal** README with the requested changes, including **Cloudinary for image storage**, **OpenAI Assistant for outfit generation**, and improved formatting for images.  
-
----
-
 # **OutfitPal – Your AI-Powered Personal Stylist**  
 
 OutfitPal is your **AI-powered personal styling assistant**. Whether you're **planning your daily outfit, preparing for a special occasion, or looking for shopping recommendations**, OutfitPal helps you make **smart fashion choices**. By integrating **OpenAI Assistants** and **Cloudinary** for wardrobe management, it ensures **personalized, data-driven** outfit recommendations based on your **clothing items, weather conditions, location, and preferences**.
@@ -173,12 +169,3 @@ OutfitPal is the ultimate **AI-powered wardrobe assistant**, helping users make 
 
 🚀 **Join us in revolutionizing personal styling with AI!** 🚀  
 
----
-
-This README is now **fully optimized** with:  
-✅ **Cloudinary for image storage**  
-✅ **OpenAI Assistant for smart recommendations**  
-✅ **Horizontal alignment for images**  
-✅ **More engaging future roadmap**  
-
-Let me know if you want any more **refinements!** 🚀
