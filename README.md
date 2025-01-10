@@ -66,6 +66,8 @@ OutfitPal is your ultimate personal style assistant. Whether you're deciding wha
 1. **Sign Up/Sign In**
    - Register with your email or log in using Google.
    - <img width="410" alt="Screenshot 2025-01-10 at 12 51 15 PM" src="https://github.com/user-attachments/assets/314c1cd7-2aa5-4ac7-ba5c-56491fe10509" />
+   - <img width="414" alt="Screenshot 2025-01-10 at 12 50 07 PM" src="https://github.com/user-attachments/assets/ffc096c6-34f3-4258-9530-7e19cc0d4d2d" />
+
 
 
 2. **Set Up Your Wardrobe**
